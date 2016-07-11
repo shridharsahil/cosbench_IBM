@@ -96,7 +96,7 @@ public class NoneStorage implements StorageAPI {
     @Override
     public InputStream getList(String container, String object, Config config) {
     	if (logging)
-            logger.info("performing LIST at /{}/{}", container, object);
+            logger.info("performing HEAD at /{}/{}", container, object);
         return new ByteArrayInputStream(new byte[] {});
     }
 
