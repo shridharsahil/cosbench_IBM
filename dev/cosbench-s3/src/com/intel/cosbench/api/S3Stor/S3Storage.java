@@ -136,6 +136,28 @@ public class S3Storage extends NoneStorage {
         
         return stream;
     }
+    
+    @Override
+	public InputStream getList(String container, String object, Config config) {
+		super.getList(container, object, config);
+		InputStream metadata = null;
+		try {
+			//logger.info("getting METADATA at /{}/{}", container, object);
+			ObjectMetadata s3objectHead = client.getObjectMetadata(container, object);
+			metadata = (InputStream) s3objectHead.getRawMetadata();
+		
+		} catch(AmazonServiceException ase) {
+			if(ase.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
+				throw new StorageException(ase);
+			}
+		} catch (AmazonClientException ace) {
+			logger.warn("below exception encountered when retreving object metadata " + object + " at bucket " + container + ": " + ace.getMessage());
+			ace.printStackTrace();
+			initClient();
+		}
+		logger.info("SUCCESSFULY got METADATA at /{}/{}", container, object);
+		return metadata;
+	}
 
     @Override
     public void createContainer(String container, Config config) {
