@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<workload name="keystone_v2_read_write" description="benchmark with 1K and 1MB objects">
+<!-- IBM Specific  Workload only for evaluation purpose. --> 
+  <storage type="swift" />
+  
+  <auth type="keystone" config="username=swift;tenant_name=swift;password=ibmcloud2016;auth_url=http://169.57.120.254:5000/v2.0;service=swift;region=RegionOne" />
+	
+  <workflow>
+
+    <workstage name="main">
+      <work name="main" workers="100" runtime="60">
+      <!-- <work name="main" workers="1" totalOps="100"> -->
+        <operation type="list" ratio="60" config="cprefix=mymixedcontainers_;oprefix=mymixedobjects_;containers=u(1,10);objects=u(1,10)" />
+        <operation type="write" ratio="40" config="cprefix=mymixedcontainers_;oprefix=mymixedobjects_;containers=u(1,10);objects=u(1,10);sizes=h(1|1|90,1024|1024|10)KB" />
+        <!-- <operation type="list" ratio="29" config="cprefix=mymixedcontainers_;oprefix=mymixedobjects_;containers=u(1,10);objects=u(1,10)" /> -->
+        <!-- <operation type="delete" ratio="1" config="cprefix=mymixedcontainers_;oprefix=mymixedobjects_;containers=u(1,10);objects=u(1,10)" /> -->
+     </work>
+    </workstage>
+
+  </workflow>
+
+</workload>
