@@ -3,6 +3,8 @@ package com.intel.cosbench.api.S3Stor;
 import static com.intel.cosbench.client.S3Stor.S3Constants.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import org.apache.http.HttpStatus;
 
@@ -136,16 +138,28 @@ public class S3Storage extends NoneStorage {
         
         return stream;
     }
-    
-    @Override
+	
+	//this function below gets the metadata of an object or lists all the objects in a container
+	//to invoke this, just specify "list" as an operation in the config xml file and it will use this function
+		//if S3 storage is specified
+	@Override
 	public InputStream getList(String container, String object, Config config) {
 		super.getList(container, object, config);
 		InputStream metadata = null;
 		try {
-			//logger.info("getting METADATA at /{}/{}", container, object);
-			ObjectMetadata s3objectHead = client.getObjectMetadata(container, object);
-			metadata = (InputStream) s3objectHead.getRawMetadata();
-		
+			if(object.isEmpty()){ //if the client is looking at a container, then it should get all the objects within it
+				//in this case, the client is the container
+				S3Object s3Obj = client.getObject(container, object);
+	            metadata = s3Obj.getObjectContent();
+			}
+			else {//if the client is looking at a specific object within a container, then list the metadata of the specific object
+				//in this case, the client is the object
+				ObjectMetadata s3objectHead = client.getObjectMetadata(container, object);
+				String meta_string = s3objectHead.toString();
+				metadata = new ByteArrayInputStream(meta_string.getBytes(StandardCharsets.UTF_8));
+				//return new ByteArrayInputStream(new byte[] {});
+			}
+			
 		} catch(AmazonServiceException ase) {
 			if(ase.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
 				throw new StorageException(ase);
